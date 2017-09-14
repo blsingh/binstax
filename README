@@ -1,0 +1,9 @@
+
+
+# Sooo, here I have a on my Linux Ubuntu OS on cloud a folder /home/blsing/Container1/G_glove_Xse which is going to be the working dir for the "predicting 2017 golden glove winner" project
+
+## I am working from Bash prompt using vimux to run command from vim so I will be working from this README file initially issuing commands and creating a reproduciable script.
+
+git init	 ## initialize this dir
+
+
