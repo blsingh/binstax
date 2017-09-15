@@ -39,15 +39,7 @@ What does work is the to upload or update the README.md in `My_Projects/G_Glove`
 
 cd ~/Container1/My_Projects
 
-ls -all ## Here the pushing `G_Glove` will be used to update the readme(THIS one), so I will save this after writing the commands below and then run them to update the README.md under `My-Projects/G_Glove`
-
-git init
-
-git add G_Glove
-
-git status
-
-git commit -m 'Update the README in G_Glove sub repo' -- G_Glove
+git commit -m 'Update something in G_Glove' -- G_Glove
 
 
 ```
