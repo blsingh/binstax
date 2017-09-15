@@ -45,4 +45,6 @@ git commit -m 'Update something in G_Glove' -- G_Glove
 ```
 
 
+Basically: init, add, (for all changes made)commit, then push.  YEAH?
+
 
