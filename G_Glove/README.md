@@ -41,10 +41,13 @@ cd ~/Container1/My_Projects
 
 git commit -m 'Update something in G_Glove' -- G_Glove
 
+git push origin master
 
 ```
 
-
 Basically: init, add, (for all changes made)commit, then push.  YEAH?
+
+
+
 
 
