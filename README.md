@@ -1,14 +1,20 @@
 Local Working dir blsingh@js-169-81:~/Container1/My_Projects
 This is repo is used to commit my projects(local dir is given above).
 
+As I detail some of my thought process below, I have gotten use to making git servible enough to get my repo's up and running efficiently for my projects.
+Just from from My_Projects and manages the files and folders in subfolders from here.
+
+---
+
 
 Is git configured, is this dir talking to the remote repo?
 I want to learn also to commint changes the make to specific dir in the repo, for example:
 For the initial project I will learn with `G_Glove` dir
 
-What I have found works for sure as of now 09152017 is that and  commit `G_Glove` dir from here My_Projects itself.  --force option allowed me to push changes to github by force.
+What I have found works for sure as of now 09152017 is that just commit `G_Glove` dir from here My_Projects fol itself.  --force option allowed me to push changes to github by force.
 
 ```
+#
 
 git add G_Glove/ # try to add the dir alone in the 'My-Project' repo
 
