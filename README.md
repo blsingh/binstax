@@ -24,4 +24,9 @@ git push origin master
 
 ```
 
+##### Below this is some rough notes about trying to copy Linux/tmux session
+```
+[SOLVED] Since I am using tmux, for my purposes I have settled on the using tmux command `capture-pane -S <# off lines>`.
 
+So after I capture I/O from a session with `script` command into a xyz.txt file, from the terminal prompt I can issue `cat xyz.txt` to view the file without non-printable characters.  In tmux check how many lines are in my xyz.txt file with copy mode.  Finally from tmux command buffer issue the `capture-pane -S <# of lines>`command and then immediately give the following command from the tmux buffer and  save it to a file zyx.txt with `:save-buffer zyx.txt`.
+```
