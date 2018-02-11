@@ -1,6 +1,6 @@
-Local Working dir blsingh@js-169-81:~/Container1/My_Projects
-This is repo is used to commit my projects(local dir is given above).
+### This repo has rough work
 
+____
 As I detail some of my thought process below, I have gotten use to making git servible enough to get my repo's up and running efficiently for my projects.
 Just from from My_Projects and manages the files and folders in subfolders from here.
 
