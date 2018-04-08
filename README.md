@@ -1,8 +1,7 @@
 ### This repo has rough work
 
 ____
-As I detail some of my thought process below, I have gotten use to making git servible enough to get my repo's up and running efficiently for my projects.
-Just from from My_Projects and manages the files and folders in subfolders from here.
+Details of some of my thoughts below on basic Git,
 
 ---
 
