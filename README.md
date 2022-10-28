@@ -1,8 +1,5 @@
 ### This repo has rough work
 
-____
-Details of some of my thoughts below on basic Git,
-
 ---
 
 
