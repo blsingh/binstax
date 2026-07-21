@@ -1,0 +1,169 @@
+## Close the current CCME session
+
+Yes, close it. Your last completed poll reported:
+
+```text
+NO_CHANGE — input_ts=1784240362, output_ts=1784571180
+```
+
+The output is newer than the input, so **there is no unprocessed mailbox turn to lose**. The next scheduled poll encountered the Claude limit before doing useful work.
+
+You can select:
+
+```text
+1. Stop and wait for limit to reset
+```
+
+or simply close the Claude CLI/terminal window. Do **not** select “Upgrade your plan” merely because of this one event.
+
+## What probably caused the limit
+
+The distinction is:
+
+* **Ignore any suggestion that Claude Code requires separate API billing.** Claude Pro includes interactive Claude Code.
+* **Do not ignore the usage limit itself.** Pro is not unlimited.
+
+Claude web/app and interactive Claude Code share the same Pro allowance. Merely having the Claude app open does not consume usage, but requests made there contribute to the same allowance as Claude Code. ([Claude Help Center][1])
+
+Your strongest suspect is the one-minute CCME polling loop:
+
+```text
+/poll
+Ran 3 shell commands
+NO_CHANGE
+Brewed for 20s
+```
+
+Those are not purely local timestamp checks happening outside Claude. Each scheduled `/poll` is a Claude Code turn. Claude documents that each turn resends the conversation history, project context, and new request. Long sessions therefore consume progressively more usage even when the immediate task is small. ([Claude Help Center][2])
+
+At one poll per minute, that is:
+
+```text
+60 Claude turns per hour
+1,440 possible Claude turns per day
+```
+
+So the likely conclusion is not that ahsojJ designed CCME to require API payment. It is that **the architecture works with Pro, but permanently running an AI-mediated poll every minute can exhaust a Pro allowance**. That is an implementation/cadence issue, not evidence that CCME itself is invalid.
+
+## See what consumed the allowance
+
+### In the Claude app
+
+Open:
+
+```text
+Profile/avatar
+→ Settings
+→ Usage
+```
+
+That page shows your plan usage and the next weekly reset time. Pro has both five-hour session limits and a weekly limit shared across models. ([Claude Help Center][3])
+
+### In Claude Code after the limit resets
+
+Run:
+
+```text
+/usage
+```
+
+Then:
+
+* Press `d` for the last 24 hours.
+* Press `w` for the last seven days.
+
+`/usage` shows plan usage bars and attributes recent local usage to such things as skills, subagents, plugins, and MCP servers. Its detailed attribution is calculated from history on that machine, so it does **not** include activity from the Claude app or other devices. Your recorded Claude Code version, `2.1.187`, is new enough for this feature. ([Claude Platform Docs][4])
+
+Look specifically for whether `/poll` or the CCME skill dominates the breakdown. That will convert our strong inference into evidence.
+
+---
+
+# The `RDSI_initial` project
+
+I read the complete syllabus. It is a substantial **21-phase PowerShell 5.1 learning system**, not merely a list of prompts. Its permanent teaching architecture is:
+
+1. PowerShell 5.1 and .NET Framework 4.x only.
+2. Explain the algorithm before naming PowerShell commands.
+3. Complete the six-question decomposition rubric before projects.
+4. Claude guides; you reason and write the code.
+5. Do not advance until you can explain and apply the material.
+6. Progress from foundations through robust scripting, SQL, APIs, scheduling, provenance, and a capstone. 
+
+The four main sections are:
+
+* **Foundations and decomposition:** Windows/CLI fluency, pipelines, algorithmic primitives, types, control flow, regex, and network-drive analytics.
+* **Robust scripts:** functions, error handling, testing, CSV normalization, and DOCX table extraction.
+* **Scale and reusability:** background jobs, read-only SQL Server extraction, and modules.
+* **Integration and autonomy:** provenance, APIs, credentials, scheduled tasks, and an end-to-end capstone.
+
+The proper CCME equivalent of its “one dedicated Gemini thread” is:
+
+```text
+projects/RDSI_initial/
+├── input.md
+├── output.md
+├── memory.md
+├── RDSI_initial_training_CCME.md
+├── scripts/
+├── test-data/
+└── notes/
+```
+
+I adapted the complete syllabus so Claude replaces Gemini and added CCME-specific rules for `input.md`, `output.md`, and `memory.md`.
+
+* [Download the Claude/CCME syllabus](sandbox:/mnt/data/RDSI_initial_training_CCME.md)
+* [Download the first CCME input turn](sandbox:/mnt/data/RDSI_initial_TURN001_input.md)
+
+## Create the project
+
+After downloading those files into your Windows Downloads folder:
+
+```bash
+cd ~/ccme-lab
+git pull --rebase
+
+mkdir -p projects/RDSI_initial/{scripts,test-data,notes}
+
+cp /mnt/c/Users/blsin/Downloads/RDSI_initial_training_CCME.md \
+   projects/RDSI_initial/
+
+cp /mnt/c/Users/blsin/Downloads/RDSI_initial_TURN001_input.md \
+   projects/RDSI_initial/input.md
+
+printf '# output.md\n\n' \
+  > projects/RDSI_initial/output.md
+
+printf '# memory.md — RDSI_initial Learning State\n\n' \
+  > projects/RDSI_initial/memory.md
+
+git add projects/RDSI_initial
+git commit -m "Initialize RDSI_initial PowerShell learning workspace"
+git push
+```
+
+Then start CCME:
+
+```bash
+cd ~/ccme-lab
+bash CCME-share/claudelaunch.sh async_dev
+```
+
+When prompted for the project path, enter:
+
+```text
+/home/blsingh/ccme-lab/projects/RDSI_initial
+```
+
+Then verify and process the first turn:
+
+```text
+/whoami
+/poll
+```
+
+For this initial launch, use **one manual `/poll` rather than `/poll_on`**. That will begin Phase 1 while letting us inspect `/usage` before deciding whether to restart permanent one-minute polling. The first turn instructs Claude to establish the workspace memory, begin Windows keyboard navigation, and end with one concrete learning question—not dump the syllabus back at you.
+
+[1]: https://support.claude.com/en/articles/11145838-use-claude-code-with-your-pro-or-max-plan "Use Claude Code with your Pro or Max plan | Claude Help Center"
+[2]: https://support.claude.com/en/articles/14552983-models-usage-and-limits-in-claude-code "Models, usage, and limits in Claude Code | Claude Help Center"
+[3]: https://support.claude.com/en/articles/8325606-what-is-the-pro-plan "What is the Pro plan? | Claude Help Center"
+[4]: https://docs.anthropic.com/en/docs/claude-code/costs "Manage costs effectively - Claude Code Docs"
