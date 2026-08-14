@@ -1,0 +1,682 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What the Operator Is For</title>
+<style>
+  :root {
+    --bg:#fbfaf7; --panel:#ffffff; --panel-alt:#f3f1ec;
+    --ink:#1e1c19; --ink-soft:#55504a; --ink-faint:#857e75;
+    --rule:#ddd8cf; --rule-soft:#ebe7e0;
+    --accent:#9a5b1f; --accent-bg:#f6ece1;
+    --code-bg:#f3f1ec;
+    --shadow:0 1px 2px rgba(30,28,25,.06), 0 8px 24px rgba(30,28,25,.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg:#16151a; --panel:#1d1c22; --panel-alt:#232128;
+      --ink:#e8e4dd; --ink-soft:#b2aca3; --ink-faint:#857e75;
+      --rule:#34313a; --rule-soft:#282630;
+      --accent:#e0a56a; --accent-bg:#2b2119;
+      --code-bg:#232128;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg:#16151a; --panel:#1d1c22; --panel-alt:#232128;
+    --ink:#e8e4dd; --ink-soft:#b2aca3; --ink-faint:#857e75;
+    --rule:#34313a; --rule-soft:#282630;
+    --accent:#e0a56a; --accent-bg:#2b2119; --code-bg:#232128;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
+  }
+
+  * { box-sizing:border-box; }
+  html { -webkit-text-size-adjust:100%; }
+  body {
+    margin:0; background:var(--bg); color:var(--ink);
+    font:400 17.5px/1.68 ui-serif, Georgia, "Iowan Old Style", "Palatino Linotype", serif;
+    padding:0 1.25rem 6rem;
+  }
+  .wrap { max-width:44rem; margin:0 auto; }
+
+  header.mast { padding:5rem 0 2rem; margin-bottom:2rem; }
+  .kicker {
+    font:600 .72rem/1.4 ui-sans-serif, system-ui, sans-serif;
+    letter-spacing:.16em; text-transform:uppercase;
+    color:var(--accent); margin:0 0 1rem;
+  }
+  h1 {
+    font-size:clamp(2.1rem, 6.5vw, 3.4rem); line-height:1.05;
+    letter-spacing:-.025em; margin:0 0 1.1rem; font-weight:600;
+  }
+  .standfirst {
+    font-size:1.18rem; line-height:1.55; color:var(--ink-soft);
+    margin:0 0 1.6rem; max-width:34rem;
+  }
+  .byline {
+    font:400 .82rem/1.6 ui-sans-serif, system-ui, sans-serif;
+    color:var(--ink-faint); border-top:1px solid var(--rule);
+    padding-top:1rem;
+  }
+  .byline a { color:var(--ink-faint); }
+
+  h2 {
+    font-size:1.55rem; line-height:1.22; letter-spacing:-.018em;
+    margin:3.8rem 0 1rem; font-weight:600;
+  }
+  h2 .num {
+    display:block;
+    font:600 .7rem/1 ui-sans-serif, system-ui, sans-serif;
+    letter-spacing:.16em; text-transform:uppercase;
+    color:var(--accent); margin-bottom:.6rem;
+  }
+  h3 { font-size:1.08rem; margin:2.2rem 0 .5rem; font-weight:600; }
+  p { margin:0 0 1.15rem; }
+  ul, ol { margin:0 0 1.2rem; padding-left:1.3rem; }
+  li { margin-bottom:.6rem; }
+  a { color:var(--accent); }
+
+  code {
+    font-family:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+    font-size:.855em; background:var(--code-bg);
+    padding:.1em .35em; border-radius:3px;
+  }
+  .mono { font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace; font-size:.855em; }
+
+  /* the thesis */
+  .thesis {
+    margin:2rem 0; padding:1.5rem 1.6rem;
+    background:var(--accent-bg);
+    border-left:4px solid var(--accent);
+    border-radius:0 8px 8px 0;
+    font-size:1.2rem; line-height:1.5; font-weight:600;
+    letter-spacing:-.01em;
+  }
+  .thesis p { margin:0; }
+
+  .callout {
+    border:1px solid var(--rule); background:var(--panel);
+    border-radius:8px; padding:1.1rem 1.3rem; margin:1.8rem 0;
+    box-shadow:var(--shadow);
+  }
+  .callout p:last-child { margin-bottom:0; }
+  .callout .label {
+    display:block; margin-bottom:.6rem;
+    font:600 .7rem/1 ui-sans-serif, system-ui, sans-serif;
+    letter-spacing:.14em; text-transform:uppercase; color:var(--accent);
+  }
+
+  blockquote.src {
+    margin:1.7rem 0; padding:1rem 1.25rem;
+    background:var(--panel-alt); border:1px solid var(--rule-soft);
+    border-radius:6px; overflow-x:auto;
+    font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    font-size:.83rem; line-height:1.6; color:var(--ink-soft);
+  }
+  blockquote.src p { margin:0 0 .7rem; }
+  blockquote.src p:last-of-type { margin-bottom:0; }
+  blockquote.src cite {
+    display:block; margin-top:.85rem; font-style:normal;
+    font:400 .74rem/1.4 ui-sans-serif, system-ui, sans-serif;
+    color:var(--ink-faint);
+  }
+
+  .tablewrap { overflow-x:auto; margin:1.7rem 0; }
+  table {
+    border-collapse:collapse; width:100%;
+    font:400 .89rem/1.45 ui-sans-serif, system-ui, sans-serif;
+  }
+  th, td { text-align:left; padding:.55rem .7rem; border-bottom:1px solid var(--rule-soft); vertical-align:top; }
+  th {
+    font-weight:600; font-size:.72rem; letter-spacing:.07em;
+    text-transform:uppercase; color:var(--ink-faint);
+    border-bottom:1px solid var(--rule); white-space:nowrap;
+  }
+  tbody tr:last-child td { border-bottom:0; }
+  td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .zero { color:var(--ink-faint); }
+
+  footer.end {
+    margin-top:4.5rem; padding-top:1.5rem; border-top:1px solid var(--rule);
+    font:400 .85rem/1.7 ui-sans-serif, system-ui, sans-serif; color:var(--ink-faint);
+  }
+  footer.end a { color:var(--accent); }
+
+  @media print {
+    body { background:#fff; color:#000; font-size:11pt; padding:0; }
+    .callout, .thesis { break-inside:avoid; }
+    h2 { break-after:avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="mast">
+  <p class="kicker">An essay on agent-harness design</p>
+  <h1>What the operator is for</h1>
+  <p class="standfirst">
+    A coding agent will happily do the wrong thing correctly. Four months of building a
+    harness around one, and being wrong about it in public, produced a single design
+    rule — and a case study in what it costs to learn it.
+  </p>
+  <p class="byline">
+    Case study: <strong>CCME</strong>, a Claude Code harness, from its earliest surviving
+    snapshot to now. Written 2026-08-14. The blow-by-blow record this draws on is a
+    companion document, <a href="evolution.html">an evolution narrative</a>.
+  </p>
+</header>
+
+<h2><span class="num">One</span>An archive that shipped no behaviour</h2>
+
+<p>
+  The oldest surviving copy of CCME is a 22 KB tarball that shipped no behaviour. It holds
+  fourteen files — a launcher, two hooks, a setup script, a README, five shared commands, two
+  team manifests, a settings file, and a one-line marker naming the last thing that ran — and
+  not one profile.
+</p>
+
+<p>
+  Profiles are the entire content layer, the thing every other file in that list exists to
+  serve. At the nearest dated point there were thirty-nine profile files across ten profiles.
+  The archive captured none of them.
+</p>
+
+<p>
+  This was not a design decision. The backup routine that produced the tarball is written to
+  include exactly that content; the sweep is right there in the source, hunting for profile
+  definitions and command files. It ran, matched nothing, appended nothing, and reported
+  success. Every mechanism in it worked. What it produced was a harness with no behaviour in
+  it, and nothing in the output distinguished that from a complete archive.
+</p>
+
+<p>
+  Later, formally, in a written audit, the same defect was found again in the rewritten
+  version of that same tool — a backup that omitted authored content while printing
+  <em>"complete — no exclusions."</em> The audit's own closing note on it is the best sentence
+  anyone involved has written about this class of problem:
+</p>
+
+<div class="thesis">
+  <p>The audit verified mechanisms and missed purpose.</p>
+</div>
+
+<p>
+  That gap — between a mechanism that works and a purpose that is served — is what this essay
+  is about, because it turns out to be the gap an operator is uniquely for. Everything CCME
+  learned in four months is a variation on locating it.
+</p>
+
+<h2><span class="num">Two</span>What the harness is</h2>
+
+<p>
+  Enough orientation to make the rest legible, for a reader who has never run this thing.
+</p>
+
+<p>
+  A coding agent starts every session with no memory of the last one. The obvious lever is the
+  prompt; the more durable one is the environment the session boots into. CCME —
+  <em>Claude Code My Environment</em> — is built on that second lever, and has four moving parts.
+</p>
+
+<ul>
+  <li><strong>A profile</strong> is a directory holding one context file and a set of slash
+  commands, describing how to work in one domain — data analysis, documentation, auditing,
+  systems troubleshooting. It is markdown, top to bottom. It is what the agent loads instead
+  of starting blank.</li>
+  <li><strong>The launcher</strong> reads every profile's description line, presents them as a
+  menu, and starts the agent in the one you pick.</li>
+  <li><strong>A launchpad</strong> is the directory the session actually runs in — generated
+  fresh at launch, holding symlinks to the chosen profile's files. Editing a profile therefore
+  takes effect next session with nothing to rebuild.</li>
+  <li><strong>Hooks</strong> fire at fixed points in the session's life: one at start, one at
+  the end of every turn, one before the agent writes a file, one before a long conversation is
+  compacted. This is where the harness's opinions actually execute.</li>
+</ul>
+
+<p>
+  That description is accurate today and it was accurate at the tarball. The founding idea
+  never changed. What changed is everything underneath it, and the scale of the change is
+  worth one table before the argument starts:
+</p>
+
+<div class="tablewrap">
+<table>
+  <thead>
+    <tr><th>&nbsp;</th><th class="num">Earliest snapshot</th><th class="num">Now</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Tracked files</td><td class="num">14</td><td class="num">144</td></tr>
+    <tr><td>Lines</td><td class="num">1,676</td><td class="num">30,503</td></tr>
+    <tr><td>Launcher</td><td class="num">645</td><td class="num">2,833</td></tr>
+    <tr><td>Hooks</td><td class="num">1 file</td><td class="num">8 files</td></tr>
+    <tr><td>Tests</td><td class="num zero">none</td><td class="num">411 cases</td></tr>
+    <tr><td>Validation, continuous integration</td><td class="num zero">none</td><td class="num">2 gates</td></tr>
+    <tr><td>Documentation</td><td class="num">1 README</td><td class="num">14 files</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>
+  Note the shape rather than the totals. The executable core roughly quadrupled. The things
+  that did not exist <em>at all</em> — tests, validation, recovery tooling, documentation —
+  account for most of the difference. The harness did not mostly grow features. It grew
+  evidence.
+</p>
+
+<h2><span class="num">Three</span>The claim</h2>
+
+<p>
+  Here is the rule the four months produced, stated before the evidence rather than after it,
+  because it is the only part worth carrying away:
+</p>
+
+<div class="thesis">
+  <p>
+    Engage the operator where the decision cannot be derived from state — and absorb
+    everything that can, so those engagements stay rare enough to be worth reading.
+  </p>
+</div>
+
+<p>
+  The two clauses point in opposite directions and that is the point. Most harness design
+  advice is a version of the first clause alone — <em>surface problems, keep the human in the
+  loop</em> — which is uncontroversial and, alone, produces a system that interrupts constantly
+  and is therefore ignored. The second clause is what makes the first affordable.
+</p>
+
+<p>
+  A shorter form, which is where I would put the money: <strong>a good harness is an instrument
+  for locating the decisions that were never anyone's to automate, and handing them back.</strong>
+</p>
+
+<div class="callout">
+  <span class="label">Where this could go wrong</span>
+  <p>
+    "It serves the operator's purpose" has a trivial reading that absorbs every line of code in
+    every tool ever written, at which point it distinguishes nothing. The claim above is meant
+    to be checkable: it predicts that a well-built harness interrupts on decisions whose inputs
+    are not in the system, and does not interrupt on decisions whose inputs are —
+    <em>regardless of severity</em>. That second half is the falsifiable one, and the next
+    section opens on the case that tests it.
+  </p>
+</div>
+
+<h2><span class="num">Four</span>Engage where the answer isn't in the system</h2>
+
+<p>
+  CCME's Stop hook runs at the end of every turn and commits the session's work to a per-session
+  branch. It runs in the background; returning exit code 2 wakes the session and shows the agent
+  what went wrong. Deciding when to spend that is the sharpest design question in the harness,
+  and the answer is written into the file as a contract:
+</p>
+
+<blockquote class="src">
+<p>#&nbsp;&nbsp;&nbsp;exit 0 — [...] the work IS committed and only the push was deferred.<br>
+#&nbsp;&nbsp;&nbsp;exit 2 — NO CHECKPOINT EXISTS FOR THIS TURN and a human must act.<br>
+#<br>
+# The dividing line is deliberately "does a commit exist", not "did everything<br>
+# succeed". [...] waking the session for that would cry wolf every turn on a<br>
+# flaky link, and a wake that fires constantly is one that gets ignored.</p>
+<cite>hooks/stop-autocommit.sh — elided at the marks; the full contract is at the head of the file</cite>
+</blockquote>
+
+<p>
+  A failed push is a real failure. It is detected. It is deliberately not raised. Severity is
+  not the threshold and neither is success — the threshold is whether anything is required of
+  the operator this turn. Attention is treated as a budget that false alarms spend.
+</p>
+
+<p>
+  The same criterion, seen from the other side, produces a refusal. At session start the
+  harness reconciles the session's branch against the published one. If the branch is behind
+  and clean it re-syncs. If it is <em>dirty</em> it stops and touches nothing, and the stated
+  reason is that it cannot distinguish <strong>unwanted</strong> from <strong>unshipped</strong>.
+  Those two states are byte-identical on disk. The distinguishing fact is an intention, and it
+  exists nowhere in the repository. So the harness declines, and offers two commands — one that
+  discards the work, one that ends the branch entirely — which are simply the two shapes that
+  intention can take.
+</p>
+
+<p>
+  And a third case, which is the one that convinced me the criterion is about knowledge rather
+  than caution. An audit of the harness filed a security finding: a token was being passed in a
+  way that any local process could read. The fix was written, and then reverted — because
+  whether that threat is real depends on whether anyone else has an account on the machine, and
+  that is not a fact any code can hold. It was reverted with the reasoning recorded, not
+  deleted. The mechanism was correct. The purpose was not served.
+</p>
+
+<p>
+  Three cases, one rule. Not <em>how bad is this</em>, but <em>is the deciding fact in the
+  system or in the person</em>.
+</p>
+
+<h2><span class="num">Five</span>Absorb everything else — inference is the enemy</h2>
+
+<p>
+  The second clause is less discussed and did more work. Its subject is the class of question
+  the operator should never be asked, because the system can answer it — and the specific sin
+  is <strong>inference</strong>: deriving an identity from a plausible proxy instead of reading
+  a record that states it.
+</p>
+
+<p>
+  CCME got this wrong four times, and each fix's blind spot was the next failure.
+</p>
+
+<p>
+  Profiles originally shared one working directory, and launching a second profile moved the
+  branch under the first — so a running session's edits were committed to the wrong profile's
+  branch. The fix was a separate working directory per session. But the launcher is itself a
+  tracked file, so each of those directories held a copy of it, and each copy assumed the
+  repository was wherever it happened to be sitting; run the wrong copy and it created a
+  working directory nested inside another one. Git allowed it without complaint. A day of work
+  was filed under a profile that had never been launched.
+</p>
+
+<p>
+  Then two sessions of the <em>same</em> profile collided in the same directory, so allocation
+  became per-session rather than per-profile. And that version detected occupancy by scanning
+  the process table for anything whose working directory looked like it was in the tree — which
+  answers <em>does someone appear to be here</em>, a proxy for <em>who owns this</em>. A proxy
+  has nowhere to put its answer, so the session's identity survived only as a variable inside
+  the launcher and died with it, leaving everything downstream to recover it by parsing a
+  directory name.
+</p>
+
+<p>
+  The generalisation is one sentence in the source:
+</p>
+
+<div class="thesis">
+  <p>A tracked script cannot infer its repository from its own location, so ask git instead.</p>
+</div>
+
+<p>
+  Rotated, it covers all four: a hook cannot infer ownership from a path comparison, a
+  checkpoint cannot infer a profile from a directory name, a launcher cannot infer occupancy
+  from a process list. The fix each time was to replace a plausible-looking derivation with a
+  record that says the thing outright — today a session writes a claim file naming its process,
+  its start time, its profile, and its branch, and everything downstream reads it.
+</p>
+
+<p>
+  Now notice what none of those four fixes did: <strong>ask the operator anything.</strong> The
+  original design made concurrency a rule you had to carry in your head — <em>don't launch a
+  second profile while one is running</em> — and the fix did not make that rule louder. It made
+  the rule unnecessary. That is the second clause working, and it is what pays for the first.
+</p>
+
+<div class="callout">
+  <span class="label">Design heuristic</span>
+  <p>
+    A record that cannot be written down is a guess. If your system derives an important
+    identity — which repository, which session, which user, which tenant — ask whether the
+    derivation has anywhere to <em>store</em> its answer. If it does not, every consumer
+    downstream will re-derive it, and they will eventually disagree.
+  </p>
+</div>
+
+<h2><span class="num">Six</span>Separate by what is shareable</h2>
+
+<p>
+  The largest structural change in four months is invisible in a file listing, because it is a
+  change in what contains what.
+</p>
+
+<p>
+  Originally CCME was a folder inside the workspace. One repository held the harness, the script
+  library, and every project, and the end-of-turn hook committed all of it together. Today the
+  relationship is inverted: the harness is a standalone repository that operates on an external
+  work tree, and cloning it gets you the tooling and none of the work.
+</p>
+
+<p>
+  The same instinct was applied a second time to memory. Cross-session memory — the accumulated
+  facts a session starts warm with — moved into its own repository with its own private remote.
+  The reasoning is not technical, and that is what makes it worth repeating:
+</p>
+
+<p>
+  Profiles describe <em>how to work</em>. Handing them to a colleague costs nothing. Memory
+  describes <em>this operator</em> — how they want to be corrected, what their employer's
+  constraints are, which projects are parked and why. It accumulates as a by-product of use, and
+  it is exactly the part you would otherwise strip by hand before sharing. Keeping it in a
+  separate repository means there is nothing to strip.
+</p>
+
+<p>
+  Generalised: <strong>draw your boundaries along what each thing is shareable with, not along
+  what is technically coupled.</strong> Harnesses accumulate operator-specific residue by
+  design; if that residue lives in the same place as the tooling, the tooling stops being
+  portable and nobody notices until the first time someone asks for a copy.
+</p>
+
+<h2><span class="num">Seven</span>How a harness finds out it is wrong</h2>
+
+<p>
+  The earliest snapshot had no tests, no validator, and no continuous integration. Correctness
+  was established by the harness continuing to work. It now has 411 test cases, a profile
+  validator, and two independent gates — and the difference between those two gates is a design
+  point rather than redundancy.
+</p>
+
+<p>
+  A git pre-push hook runs before the branch reference updates, so it can <strong>gate</strong>:
+  a failing suite means the trunk never goes red. Continuous integration runs after the branch
+  has already moved, so it can only <strong>detect</strong>. Both are wanted, because CI covers
+  what the hook structurally cannot — a bypassed hook, or a clone where hooks were never
+  installed. The hook is also scoped to the trunk alone, so the per-turn checkpoint pushes that
+  happen dozens of times a session cost nothing.
+</p>
+
+<p>
+  Above the automation sits an append-only audit ledger: seven rounds of adversarial review of
+  the harness by the harness, each row carrying a claim, a disposition, and a reason. It is the
+  most useful artifact in the project, and four of its recurring lessons generalise well past
+  this codebase.
+</p>
+
+<h3>Read-and-found-clean is not coverage</h3>
+<p>
+  The recovery tool — the one that runs when the launcher is too broken to open a session — had
+  no tests, and was listed as covered because it had been read and nothing was wrong with it.
+  Its central guarantee had been broken since it was written, in a way six rounds of reading did
+  not catch, because the code looks correct unless you happen to know a particular subtlety
+  about what a given git command compares against.
+</p>
+
+<p>
+  The repetition is the part worth sitting with. Six readings did not converge on the truth,
+  because all six were performed against the same wrong model of what that command does — so the
+  sixth was wrong for exactly the reason the first was. <strong>Reading can only check the code
+  against your understanding of the system. Running it checks the understanding.</strong> Any
+  verification that consults your mental model rather than the machine inherits every error
+  already in the model, and reports confidence in proportion to how many times you have repeated
+  it.
+</p>
+
+<h3>A test carrying a copy of the code under test proves nothing</h3>
+<p>
+  Twice, in different files, a suite was written around a <em>copy</em> of an embedded block
+  rather than the shipped one. Every case passed with the fix reverted. The only reason anyone
+  found out is <strong>mutation testing</strong>: deliberately break the fix, confirm the test
+  goes red, restore. A green suite is evidence that tests pass. It is not evidence that they
+  would fail.
+</p>
+
+<h3>When a finding names one instance, enumerate the set</h3>
+<p>
+  A review found one unguarded case of a shell operator; enumerating every operator of that kind
+  found three, all failing identically. The enumeration cost less than the reading that produced
+  the finding. The inverse showed up a round later: a false claim in a comment was fixed in the
+  file that was cited, while a second file carried the same claim verbatim. <em>Grep the claim,
+  not the file.</em>
+</p>
+
+<h3>The operator finds what the audit cannot</h3>
+<p>
+  This is the one that matters. Three of the highest-value findings in the entire ledger were
+  raised by the human, not by the review — and all three were <em>purpose</em> findings rather
+  than <em>mechanism</em> findings. The review had read the backup's collection logic three
+  times without asking what was not in it. It could enumerate what the code did indefinitely and
+  never ask what the code was for.
+</p>
+
+<p>
+  That is the same failure as the archive in section one, and it is not incidental to automated
+  review — it is structural. A system can check itself against its specification. It cannot
+  check its specification against your intent, because your intent is not in it. Which is the
+  thesis again, arrived at from the opposite direction.
+</p>
+
+<h2><span class="num">Eight</span>Comments are the durable layer</h2>
+
+<p>
+  A stylistic change worth stealing. In the early snapshot, comments describe behaviour: purpose,
+  usage, deployment. Good comments. They tell you what the code does.
+</p>
+
+<p>
+  In the current tree, comments <em>litigate</em>. They record what was tried, what broke, what
+  was rejected and why, and what a future maintainer must not undo.
+</p>
+
+<blockquote class="src">
+<p># The lock is cleared only when it is old enough that no live git process could<br>
+# plausibly still hold it. There is no portable way to ask "does a process own this<br>
+# lock" [...] so age is the available signal.</p>
+<cite>a constraint, not a description</cite>
+</blockquote>
+
+<blockquote class="src">
+<p># Warn rather than edit their PATH. A recovery tool the user cannot invoke<br>
+# from memory when the harness is down is not a recovery tool.</p>
+<cite>a rejected alternative, kept as the reason</cite>
+</blockquote>
+
+<p>
+  This matters more for an agent harness than for ordinary code, because the reader is often a
+  model with no memory of the last session, and a comment stating a rejected alternative is the
+  cheapest possible way to stop it being re-proposed every week. The failed designs live in the
+  comments; that is where an evolution is actually recorded.
+</p>
+
+<p>
+  There is a cost, and the audit found it. A comment that reads as a guarantee, when it is really
+  a hedge, stops the next person checking. One in this tree claimed a smoke test exercised a code
+  path that a command-line flag was in fact short-circuiting entirely — verified by tracing which
+  lines actually executed: zero. The support machinery built to preserve that property was kept,
+  but its justification was rewritten as what it honestly is: a hedge. The rewrite carries an
+  instruction to delete the machinery and the paragraph together, rather than restore the old
+  rationale. Hence the standing rule the harness now enforces on itself: <strong>a comment states
+  intent, never behaviour.</strong> Read the code it sits on before believing it.
+</p>
+
+<h3>Legibility is what makes an interrupt worth answering</h3>
+
+<p>
+  It is worth naming the property these mechanisms share, because the essay has been circling it.
+  The litigating comments, the append-only ledger with a reason in every row, the claim files
+  that state a session's identity instead of implying it, the reverted security finding kept in
+  the record rather than deleted, the exit-code contract written where the next reader will meet
+  it — these are not four virtues. They are one, and it is <strong>legibility</strong>: the
+  system keeping a readable account of what it decided, on what grounds, and what it rejected.
+</p>
+
+<p>
+  Legibility is not a third thing a harness does alongside engaging and absorbing. It is what
+  makes engaging <em>worth the interruption</em>. Routing a decision to the operator is close to
+  useless if they cannot reconstruct why it is being asked or what has already been tried; the
+  interrupt arrives, they have no basis to answer better than the machine would have, and they
+  approve it. That is how a human-in-the-loop becomes a rubber stamp — not through laziness, but
+  through being handed a question stripped of everything needed to answer it.
+</p>
+
+<p>
+  It is also not free, and the smoke-test comment above is the proof. A record of past reasoning
+  is equally a mechanism for propagating past error, and it earns its place only while it stays
+  honest about which of its claims were actually verified. The ledger does this explicitly: each
+  round closes with a note distinguishing findings reproduced before the fix from tests written
+  after it, so a reader knows which rows are load-bearing. A record that does not mark its own
+  confidence is not legibility. It is just more text to be misled by, with a citation attached.
+</p>
+
+<h2><span class="num">Nine</span>What did not change</h2>
+
+<p>
+  Four months of correction, and the founding structure is untouched. That is not sentiment — it
+  is the strongest evidence available that the original instinct was right, and it reclassifies
+  everything above from repair to refinement. Each invariant turns out to be the thesis, stated
+  before anyone had words for it.
+</p>
+
+<ul>
+  <li><strong>Profile → launcher → launchpad.</strong> The operator declares a posture; the
+  harness assembles it. The one decision that is unambiguously the human's — <em>what kind of
+  work is this?</em> — is the only one the system asks at startup.</li>
+  <li><strong>Markdown all the way down.</strong> Profiles, commands, teams, and the ledger are
+  plain text with a comment-header block. Everything the harness believes is readable and
+  editable without tooling, by the person whose judgment it is supposed to be routing.</li>
+  <li><strong>No dependencies.</strong> Bash and Python, both already present. No install step.
+  The harness never hands the operator a problem that isn't theirs to solve.</li>
+  <li><strong>An honest threat model, written down.</strong> Single operator, single machine,
+  stated in a document and used to close findings — including the reverted one in section four.
+  A harness that pretends to defend against a co-tenant it does not have will spend the
+  operator's attention on theatre.</li>
+</ul>
+
+<h2><span class="num">Ten</span>The takeaway</h2>
+
+<p>
+  An agent will do the wrong thing correctly, indefinitely, and report success — because
+  correctness is checkable against a specification and rightness is not checkable against
+  anything the agent holds. That asymmetry is permanent. It does not get better with a larger
+  model, because it is not a competence problem; the archive in section one was produced by code
+  that worked exactly as written.
+</p>
+
+<p>
+  So the operator's role is not supervision and it is not approval. Those are what you get from
+  routing <em>everything</em> to the human, and section eight covers where they end up. The role
+  is narrower and much harder to automate away: holding the purpose the system is being measured
+  against. Everything the harness grew in four months — the tests, the audit rounds, the claim
+  files, the exit-code contract, the comments that argue with you — is instrumentation for
+  finding the places where that purpose has to be consulted, for arriving there with enough
+  context that consulting is worth doing, and for keeping the number of such places small enough
+  that it stays possible.
+</p>
+
+<div class="thesis">
+  <p>
+    A harness is an instrument for locating the decisions that were never anyone's to automate,
+    and handing them back. It cannot hold your purpose. It can only hold a record of where it
+    last looked for it.
+  </p>
+</div>
+
+<p>
+  Which leaves one uncomfortable implication, stated plainly because the alternative is pretending
+  otherwise. Nothing above can be fully automated either, including the judgment about which
+  decisions belong to the operator. The ledger's own record says so: the three findings that
+  mattered most were the ones the automated review could not have raised. The harness gets better
+  at asking. It never stops needing someone to answer.
+</p>
+
+<footer class="end">
+  <p>
+    <strong>Case study.</strong> CCME is a Claude Code harness built by one operator between
+    2026-03-23 and now. Figures were measured against the tree rather than quoted: the earliest
+    snapshot is a 22 KB archive with internal timestamps running to 2026-06-16; the current tree
+    is 144 tracked files and 30,503 lines. Incidents, dates, and audit dispositions are recorded
+    in <a href="evolution.html">the evolution narrative</a>, <a href="concepts.md">concepts</a>,
+    and <a href="audit_ledger.md">the audit ledger</a>. Quoted comments are verbatim from the
+    tree, elided only where marked.
+  </p>
+</footer>
+
+</div>
+</body>
+</html>
