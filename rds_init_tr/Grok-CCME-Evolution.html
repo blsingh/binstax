@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CCME — Design Methodology</title>
+<style>
+  :root {
+    --bg:        #fbfaf7;
+    --panel:     #ffffff;
+    --panel-alt: #f3f1ec;
+    --ink:       #1e1c19;
+    --ink-soft:  #55504a;
+    --ink-faint: #857e75;
+    --rule:      #ddd8cf;
+    --rule-soft: #ebe7e0;
+    --accent:    #9a5b1f;
+    --accent-bg: #f6ece1;
+    --dead:      #8a3b3b;
+    --dead-bg:   #f8ebe9;
+    --live:      #2f6a4a;
+    --live-bg:   #e8f2ec;
+    --code-bg:   #f3f1ec;
+    --shadow:    0 1px 2px rgba(30,28,25,.06), 0 8px 24px rgba(30,28,25,.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg:        #16151a;
+      --panel:     #1d1c22;
+      --panel-alt: #232128;
+      --ink:       #e8e4dd;
+      --ink-soft:  #b2aca3;
+      --ink-faint: #857e75;
+      --rule:      #34313a;
+      --rule-soft: #282630;
+      --accent:    #e0a56a;
+      --accent-bg: #2b2119;
+      --dead:      #e08c86;
+      --dead-bg:   #2c1e1d;
+      --live:      #7fc4a0;
+      --live-bg:   #1a2723;
+      --code-bg:   #232128;
+      --shadow:    0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg:#16151a; --panel:#1d1c22; --panel-alt:#232128; --ink:#e8e4dd;
+    --ink-soft:#b2aca3; --ink-faint:#857e75; --rule:#34313a; --rule-soft:#282630;
+    --accent:#e0a56a; --accent-bg:#2b2119; --dead:#e08c86; --dead-bg:#2c1e1d;
+    --live:#7fc4a0; --live-bg:#1a2723; --code-bg:#232128;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 400 17px/1.65 ui-serif, Georgia, "Iowan Old Style", "Palatino Linotype", serif;
+    padding: 0 1.25rem 6rem;
+  }
+  .wrap { max-width: 42rem; margin: 0 auto; }
+
+  header.mast {
+    padding: 4rem 0 1.75rem;
+    border-bottom: 3px double var(--rule);
+    margin-bottom: 2.25rem;
+  }
+  .kicker {
+    font: 600 .72rem/1.4 ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 .85rem;
+  }
+  h1 {
+    font-size: clamp(1.85rem, 5.5vw, 2.6rem);
+    line-height: 1.1;
+    letter-spacing: -.02em;
+    margin: 0 0 .85rem;
+    font-weight: 600;
+  }
+  .standfirst {
+    font-size: 1.1rem;
+    color: var(--ink-soft);
+    margin: 0 0 1.4rem;
+    max-width: 36rem;
+  }
+  .byline {
+    font: 400 .82rem/1.6 ui-sans-serif, system-ui, sans-serif;
+    color: var(--ink-faint);
+  }
+
+  h2 {
+    font-size: 1.45rem;
+    line-height: 1.25;
+    letter-spacing: -.015em;
+    margin: 3.25rem 0 .4rem;
+    font-weight: 600;
+    scroll-margin-top: 1rem;
+  }
+  h2 .num {
+    display: block;
+    font: 600 .7rem/1 ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: .5rem;
+  }
+  h3 {
+    font-size: 1.08rem;
+    margin: 2rem 0 .45rem;
+    font-weight: 600;
+  }
+  p { margin: 0 0 1rem; }
+  ul, ol { margin: 0 0 1.1rem; padding-left: 1.25rem; }
+  li { margin-bottom: .45rem; }
+  strong { font-weight: 600; }
+  em { font-style: italic; }
+  a { color: var(--accent); }
+  hr.sep {
+    border: 0; height: 1px; background: var(--rule-soft);
+    margin: 2.5rem 0;
+  }
+
+  code, .mono {
+    font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    font-size: .855em;
+  }
+  code {
+    background: var(--code-bg);
+    padding: .1em .35em;
+    border-radius: 3px;
+  }
+
+  nav.toc {
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 1.2rem 1.4rem;
+    margin: 0 0 1.75rem;
+    box-shadow: var(--shadow);
+  }
+  nav.toc h4 {
+    margin: 0 0 .65rem;
+    font: 600 .78rem/1.4 ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  nav.toc ol {
+    margin: 0; padding-left: 1.3rem;
+    font: 400 .92rem/1.5 ui-sans-serif, system-ui, sans-serif;
+    columns: 2; column-gap: 1.75rem;
+  }
+  nav.toc li { margin-bottom: .35rem; break-inside: avoid; }
+  nav.toc a { text-decoration: none; color: var(--ink-soft); }
+  nav.toc a:hover { color: var(--accent); text-decoration: underline; }
+  @media (max-width: 34rem) { nav.toc ol { columns: 1; } }
+
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-bg);
+    padding: .9rem 1.15rem;
+    margin: 1.4rem 0;
+    border-radius: 0 6px 6px 0;
+  }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout .label {
+    font: 600 .7rem/1 ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: .14em; text-transform: uppercase;
+    color: var(--accent); display: block; margin-bottom: .45rem;
+  }
+
+  blockquote.src {
+    margin: 1.4rem 0;
+    padding: .9rem 1.15rem;
+    background: var(--panel-alt);
+    border-radius: 6px;
+    border: 1px solid var(--rule-soft);
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: .84rem;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    overflow-x: auto;
+  }
+  blockquote.src p { margin: 0 0 .55rem; }
+  blockquote.src p:last-of-type { margin-bottom: 0; }
+  blockquote.src cite {
+    display: block;
+    margin-top: .7rem;
+    font: 400 .74rem/1.4 ui-sans-serif, system-ui, sans-serif;
+    font-style: normal;
+    color: var(--ink-faint);
+  }
+
+  .thesis {
+    margin: 1.5rem 0;
+    padding: 1rem 1.2rem;
+    border-left: 3px solid var(--accent);
+    font-size: 1.08rem;
+    line-height: 1.55;
+  }
+
+  footer.end {
+    margin-top: 4rem;
+    padding-top: 1.4rem;
+    border-top: 3px double var(--rule);
+    font: 400 .85rem/1.65 ui-sans-serif, system-ui, sans-serif;
+    color: var(--ink-faint);
+  }
+
+  @media print {
+    body { background: #fff; color: #000; font-size: 11pt; padding: 0; }
+    nav.toc, .callout { break-inside: avoid; }
+    h2 { break-after: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="mast">
+  <p class="kicker">CCME · Design methodology</p>
+  <h1>Absorb what state can decide. Escalate only what it cannot.</h1>
+  <p class="standfirst">
+    CCME is a harness in front of Claude Code. Its evolution was driven almost entirely by
+    silent failures — successes and failures that looked identical until work was already lost.
+    The methodology that resulted is not a feature list. It is a rule for rationing the
+    operator’s attention.
+  </p>
+  <div class="byline">
+    <span>A design thesis, distilled from the harness’s growth from fourteen files to a
+    self-auditing control plane.</span>
+  </div>
+</header>
+
+<nav class="toc">
+  <h4>Contents</h4>
+  <ol>
+    <li><a href="#problem">The problem the harness solves</a></li>
+    <li><a href="#thesis">The central rule</a></li>
+    <li><a href="#silent">Silent failure as the teacher</a></li>
+    <li><a href="#identity">Do not infer identity from location</a></li>
+    <li><a href="#custody">Custody of the repository</a></li>
+    <li><a href="#interrupt">When to interrupt</a></li>
+    <li><a href="#evidence">Grow evidence, not just features</a></li>
+    <li><a href="#comments">Comments litigate, they do not describe</a></li>
+    <li><a href="#prune">Prune what no longer earns its keep</a></li>
+    <li><a href="#invariant">What stays fixed</a></li>
+  </ol>
+</nav>
+
+<h2 id="problem"><span class="num">One</span>The problem the harness solves</h2>
+
+<p>
+  A coding agent starts every session cold. The interesting lever is not the prompt but the
+  environment the session boots into. CCME treats that environment as the unit of design:
+</p>
+
+<ul>
+  <li>A <strong>profile</strong> is a directory holding a context file and domain-specific
+  slash commands.</li>
+  <li>A <strong>launcher</strong> presents profiles as a menu, builds an isolated working
+  directory of symlinks into the chosen profile, and starts the agent there.</li>
+  <li><strong>Hooks</strong> fire at session start and at the end of every turn.</li>
+</ul>
+
+<p>
+  That mechanism is unchanged from the first useful version. Everything that follows sits
+  underneath it. The growth was not primarily new capability; it was the machinery required
+  to keep the mechanism honest under concurrency, recovery, and operator load.
+</p>
+
+<h2 id="thesis"><span class="num">Two</span>The central rule</h2>
+
+<div class="thesis">
+  Engage the operator where the decision cannot be derived from state — and absorb everything
+  that can, so those engagements stay rare enough to be worth reading.
+</div>
+
+<p>
+  Importance is not the test. A failed network push is a real failure; the harness detects it
+  and deliberately declines to raise it, because a commit that already exists on disk will
+  retry next turn. Waking the session for that would cry wolf. The test is whether the
+  distinguishing fact lives anywhere in the system. If it lives only in the operator’s head,
+  the system must stop and ask. If it can be recorded or derived, the system must record it
+  and stop asking.
+</p>
+
+<p>
+  The rest of the methodology is the set of practices that make that rule enforceable.
+</p>
+
+<h2 id="silent"><span class="num">Three</span>Silent failure as the teacher</h2>
+
+<p>
+  Nearly every structural change was forced by a silent success that produced a broken
+  outcome. The pattern is always the same: an operation reports completion, the observable
+  state looks normal, and the thing the operator needed is absent or wrong.
+</p>
+
+<p>
+  Early examples: a backup that archived the launcher and hooks but zero profiles, because
+  <code>find</code> against a missing path exits cleanly and the loop appends nothing; a Stop
+  hook that printed “Committed” without checking the commit’s exit status; a nested worktree
+  that <code>git worktree add</code> created without complaint and onto which a day’s work was
+  checkpointed under the wrong profile name.
+</p>
+
+<p>
+  The defect is not the failure itself. It is the indistinguishability of success and failure
+  at the moment a human is listening. The fix, each time, was to make the quiet path speak —
+  or to remove the path that required the operator to notice silence.
+</p>
+
+<div class="callout">
+  <span class="label">Methodological consequence</span>
+  <p>
+    Prefer a written claim over a derived inference. Prefer an explicit refusal over a
+    plausible-looking default. Prefer a loud non-event over a silent partial success. The
+    harness is allowed to be quiet only when the operator’s judgment is not required.
+  </p>
+</div>
+
+<h2 id="identity"><span class="num">Four</span>Do not infer identity from location</h2>
+
+<p>
+  The single most repeated class of bug was treating a path, a directory basename, or a
+  process’s working directory as a reliable identity. Each fix’s blind spot became the next
+  failure:
+</p>
+
+<ol>
+  <li><strong>Shared checkout, concurrent profiles.</strong> Launching a second profile
+  switched the working tree out from under the first. Fix: one git worktree per profile;
+  nothing switches branches at launch.</li>
+  <li><strong>Worktree copy of the launcher.</strong> A tracked script cannot infer its
+  repository from its own location. Fix: ask <code>git --git-common-dir</code>, guarded so the
+  answer must actually look like CCME.</li>
+  <li><strong>Two sessions of the same profile.</strong> One worktree per profile recreated
+  the original collision inside a single name. Fix: occupancy, not existence — allocate the
+  next free numbered instance rather than share.</li>
+  <li><strong>Occupancy still inferred.</strong> Walking <code>/proc</code> answers “does
+  someone appear to be here,” not “who owns this.” Fix: a claim file written with the
+  launcher’s pid (which survives the final <code>exec claude</code>); death is the release,
+  staleness is decided by the kernel.</li>
+</ol>
+
+<p>
+  The generalisation, stated in the source: a tracked script cannot infer its repository from
+  its own location, so ask git instead. Rotated, the same sentence covers profile identity,
+  occupancy, and ownership. In every case the fix replaced a plausible derivation with a
+  record that says the thing outright — and none of the four fixes asked the operator
+  anything. Concurrency stopped being a rule the operator had to carry and became bookkeeping
+  the system absorbs.
+</p>
+
+<h2 id="custody"><span class="num">Five</span>Custody of the repository</h2>
+
+<p>
+  The harness commits work. That makes ownership and branch discipline load-bearing, not
+  optional.
+</p>
+
+<ul>
+  <li><strong>Whose repository?</strong> Hooks decide ownership against the shared git common
+  directory — the one identity a main checkout and all linked worktrees agree on. Outside
+  CCME they are inert. Global registration without this check once staged and pushed every
+  Claude Code session on the machine.</li>
+  <li><strong>Which branch?</strong> Every session runs on <code>wip/&lt;profile&gt;</code>.
+  The Stop hook checkpoints there every turn. <code>main</code> receives only squash-merged
+  commits from <code>/me-ship</code>. Messy checkpoints, clean trunk. The per-turn trail is
+  archived to eval refs rather than discarded, so agent (and operator) behaviour remains
+  reviewable.</li>
+  <li><strong>Three endings, not one.</strong> Ship promotes; clean discards content and
+  resets onto main; scrap deletes branch, worktree, and session. Session-start reconcile
+  refuses to guess on a dirty branch: unwanted and unshipped are byte-identical on disk. The
+  distinguishing fact lives only in the operator’s head, so the harness declines.</li>
+</ul>
+
+<p>
+  The same instinct produced the structural inversion: CCME is a standalone control plane that
+  operates on an external work tree. Cloning it yields tooling and none of the work. Memory
+  is a third repository, because profiles describe how to work (shareable) while memory
+  describes this operator (not).
+</p>
+
+<h2 id="interrupt"><span class="num">Six</span>When to interrupt</h2>
+
+<p>
+  The Stop hook’s exit-code contract is the clearest statement of the central rule in the
+  tree. Exit 0 means nothing to report — a checkpoint was made, or there was legitimately
+  nothing to do, or the work is committed and only the push was deferred. Exit 2 means no
+  checkpoint exists for this turn and a human must act.
+</p>
+
+<blockquote class="src">
+<p># The dividing line is deliberately "does a commit exist", not "did everything<br>
+# succeed". A commit that has not been pushed yet is on disk and retries next<br>
+# turn; waking the session for that would cry wolf every turn on a flaky link,<br>
+# and a wake that fires constantly is one that gets ignored.</p>
+<cite>hooks/stop-autocommit.sh — the exit-code contract</cite>
+</blockquote>
+
+<p>
+  Loudness is a budget. A false alarm spends it. The threshold is therefore not severity and
+  not success; it is whether operator judgment is actually required this turn.
+</p>
+
+<h2 id="evidence"><span class="num">Seven</span>Grow evidence, not just features</h2>
+
+<p>
+  The harness grew an order of magnitude in size. The majority of that growth is tests,
+  validation, documentation, recovery tooling, and an append-only audit ledger — not new
+  user-facing capability. Correctness stopped being “it keeps working” and became measurable.
+</p>
+
+<p>
+  Practical consequences of that shift:
+</p>
+
+<ul>
+  <li>A pre-push gate runs the suite before <code>main</code> moves; CI detects what the gate
+  cannot (<code>--no-verify</code>, clones without hooks). The gate is asymmetric: wip
+  checkpoints cost nothing; the suite is paid at ship time.</li>
+  <li>The ledger is twenty rounds of adversarial self-review with immutable finding IDs,
+  dispositions, and reasons. It has its own checker; the checker is under test. Findings are
+  cheap to assert and expensive to verify — measurement has disproved several, which stay in
+  the record with the premise marked false rather than being quietly dropped.</li>
+  <li>A gate its author cannot satisfy is a deadlock. New checks are run against the live
+  tree before they are registered.</li>
+  <li>When a finding names one instance, enumerate the set. When a claim is false in one
+  place, grep the claim, not the file.</li>
+  <li>A test that carries a copy of the code under test proves nothing; mutation leaves it
+  green. Extract from the shipped file, anchored on surrounding comments so a mutation reaches
+  the assertions.</li>
+  <li>Verifying the mechanism is not verifying the purpose. Widening a backup’s coverage to
+  survive disk loss was correct for recovery and exactly wrong for the second question the
+  same path set was answering — what is safe to hand to another person. The audit verified
+  mechanisms and missed purpose; the operator caught both findings.</li>
+</ul>
+
+<p>
+  Evidence is the instrument that locates decisions that were never anyone’s to automate, and
+  hands them back.
+</p>
+
+<h2 id="comments"><span class="num">Eight</span>Comments litigate, they do not describe</h2>
+
+<p>
+  Early comments described behaviour. Current comments record what was tried, what broke, what
+  was rejected and why, and what a future maintainer must not undo. Failed designs are buried
+  in the source next to the code that replaced them, so the next change has to argue with the
+  history rather than around it.
+</p>
+
+<blockquote class="src">
+<p># Warn rather than edit their PATH. A recovery tool the user cannot invoke<br>
+# from memory when the harness is down is not a recovery tool.</p>
+<cite>claudelaunch.sh — a rejected alternative, kept as the reason</cite>
+</blockquote>
+
+<p>
+  There is a cost. A comment that reads as a guarantee, when it is really a hedge, stops the
+  next person from checking. The standing rule that came out of the ledger: a comment states
+  intent; it never states behaviour. Read the code the comment sits on before reporting what
+  it does. That clause is now inside the harness itself.
+</p>
+
+<h2 id="prune"><span class="num">Nine</span>Prune what no longer earns its keep</h2>
+
+<p>
+  Several mechanisms were correct for the tree they were written against and became wrong when
+  something else changed. They were removed rather than left as dead weight or soft options:
+</p>
+
+<ul>
+  <li>Tracked launchpad symlinks (absolute paths; churned machine-specific state onto every
+  branch). Now gitignored and regenerated on launch.</li>
+  <li>A global <code>.active-profile</code> marker (adequate for one session; wrong under
+  concurrency). Superseded by per-session claim files.</li>
+  <li>Profile-from-basename derivation (lossless until numbered instances existed; suffix
+  stripping then mangled legitimate names and drifted across call sites).</li>
+  <li>Tracked per-machine permission grants. Replaced by a drift gate and a prune at launch.</li>
+  <li>A security mitigation that was moot on a single-user box and cost lines defending a
+  door that is not there. Reverted; the reasoning stayed in the ledger.</li>
+  <li>Archiving scrap branches to eval refs (made permanent the work the operator had just
+  judged worthless).</li>
+  <li>Seeding every profile session with its cold-start brief (right once, noise thereafter).
+  Moved on-demand; retained only for teams, where a lead that does not know it is a lead is
+  not a team.</li>
+  <li>An unconditional torrent-and-seed side effect of backup. Publishing must never be a
+  side effect of backing up; the path was later removed entirely after producing defects and
+  never being used.</li>
+</ul>
+
+<p>
+  Removal is part of the methodology. A mechanism that no longer earns the attention it costs
+  — operator or maintainer — is a liability, even if it still “works.”
+</p>
+
+<h2 id="invariant"><span class="num">Ten</span>What stays fixed</h2>
+
+<p>
+  The conserved region is small and intentional:
+</p>
+
+<ul>
+  <li><strong>Core mechanism.</strong> Profile → launcher → launchpad of symlinks → agent.
+  Editing a profile’s source takes effect in the next session with nothing to re-run.</li>
+  <li><strong>Markdown as substrate.</strong> Profiles, commands, teams, notes, and the ledger
+  use the same header-directive idiom. The parser is now one function; the idea is original.</li>
+  <li><strong>No dependencies beyond bash and python3.</strong> No install step. Clone and run.</li>
+  <li><strong>Inventory at session start.</strong> The agent is told what tools and projects
+  exist so it does not have to go looking. Filenames are now wrapped as untrusted data; the
+  habit is not.</li>
+  <li><strong>Single-operator threat model, written down and used.</strong> Findings that
+  defend against a co-tenant the harness does not have are closed on that basis.</li>
+</ul>
+
+<hr class="sep">
+
+<p>
+  CCME is an augmentation harness, so the question its design answers is what the operator is
+  for. The answer the code converged on is the rule stated at the outset: escalate only the
+  decisions whose inputs are not in the repository; absorb the rest so those escalations remain
+  rare enough to read. Failing loudly is the enabling mechanism, not the goal — you cannot
+  route a decision to the operator that the system never surfaced. Evidence, written claims,
+  explicit refusals, and litigating comments are the instruments that keep the quiet path
+  honest and the loud path scarce.
+</p>
+
+<footer class="end">
+  <p>
+    Distilled from the harness’s evolution from a fourteen-file prototype to a self-auditing
+    control plane. The full specimen comparison, audit ledger, and source comments remain the
+    primary record; this document states only the methodology that survived contact with
+    silent failure.
+  </p>
+</footer>
+
+</div>
+</body>
+</html>
