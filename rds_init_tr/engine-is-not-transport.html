@@ -1,0 +1,678 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>An Engine Is Not Transport</title>
+<style>
+  :root {
+    --bg:        #fbfaf7;
+    --panel:     #ffffff;
+    --panel-alt: #f3f1ec;
+    --ink:       #1e1c19;
+    --ink-soft:  #55504a;
+    --ink-faint: #857e75;
+    --rule:      #ddd8cf;
+    --rule-soft: #ebe7e0;
+    --accent:    #9a5b1f;
+    --accent-bg: #f6ece1;
+    --dead:      #8a3b3b;
+    --dead-bg:   #f8ebe9;
+    --live:      #2f6a4a;
+    --live-bg:   #e8f2ec;
+    --code-bg:   #f3f1ec;
+    --shadow:    0 1px 2px rgba(30,28,25,.06), 0 8px 24px rgba(30,28,25,.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg:        #16151a;
+      --panel:     #1d1c22;
+      --panel-alt: #232128;
+      --ink:       #e8e4dd;
+      --ink-soft:  #b2aca3;
+      --ink-faint: #857e75;
+      --rule:      #34313a;
+      --rule-soft: #282630;
+      --accent:    #e0a56a;
+      --accent-bg: #2b2119;
+      --dead:      #e08c86;
+      --dead-bg:   #2c1e1d;
+      --live:      #7fc4a0;
+      --live-bg:   #1a2723;
+      --code-bg:   #232128;
+      --shadow:    0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg:#16151a; --panel:#1d1c22; --panel-alt:#232128; --ink:#e8e4dd;
+    --ink-soft:#b2aca3; --ink-faint:#857e75; --rule:#34313a; --rule-soft:#282630;
+    --accent:#e0a56a; --accent-bg:#2b2119; --dead:#e08c86; --dead-bg:#2c1e1d;
+    --live:#7fc4a0; --live-bg:#1a2723; --code-bg:#232128;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 400 17px/1.65 ui-serif, Georgia, "Iowan Old Style", "Palatino Linotype", serif;
+    padding: 0 1.25rem 6rem;
+  }
+  .wrap { max-width: 42rem; margin: 0 auto; }
+
+  header.mast {
+    padding: 4rem 0 1.75rem;
+    border-bottom: 3px double var(--rule);
+    margin-bottom: 2.25rem;
+  }
+  .kicker {
+    font: 600 .72rem/1.4 ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 .85rem;
+  }
+  h1 {
+    font-size: clamp(1.85rem, 5.5vw, 2.6rem);
+    line-height: 1.1;
+    letter-spacing: -.02em;
+    margin: 0 0 .85rem;
+    font-weight: 600;
+  }
+  .standfirst {
+    font-size: 1.1rem;
+    color: var(--ink-soft);
+    margin: 0 0 1.4rem;
+    max-width: 36rem;
+  }
+
+  h2 {
+    font-size: 1.45rem;
+    line-height: 1.25;
+    letter-spacing: -.015em;
+    margin: 3.25rem 0 .4rem;
+    font-weight: 600;
+    scroll-margin-top: 1rem;
+  }
+  h2 .num {
+    display: block;
+    font: 600 .7rem/1 ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: .5rem;
+  }
+  h3 {
+    font-size: 1.08rem;
+    margin: 2rem 0 .45rem;
+    font-weight: 600;
+  }
+  p { margin: 0 0 1rem; }
+  ul, ol { margin: 0 0 1.1rem; padding-left: 1.25rem; }
+  li { margin-bottom: .45rem; }
+  strong { font-weight: 600; }
+  em { font-style: italic; }
+  a { color: var(--accent); }
+
+  nav.toc {
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 1.2rem 1.4rem;
+    margin: 0 0 1.75rem;
+    box-shadow: var(--shadow);
+  }
+  nav.toc h4 {
+    margin: 0 0 .65rem;
+    font: 600 .78rem/1.4 ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  nav.toc ol {
+    margin: 0; padding-left: 1.3rem;
+    font: 400 .92rem/1.5 ui-sans-serif, system-ui, sans-serif;
+    columns: 2; column-gap: 1.75rem;
+  }
+  nav.toc li { margin-bottom: .35rem; break-inside: avoid; }
+  nav.toc a { text-decoration: none; color: var(--ink-soft); }
+  nav.toc a:hover { color: var(--accent); text-decoration: underline; }
+  @media (max-width: 34rem) { nav.toc ol { columns: 1; } }
+
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-bg);
+    padding: .9rem 1.15rem;
+    margin: 1.4rem 0;
+    border-radius: 0 6px 6px 0;
+  }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout .label {
+    font: 600 .7rem/1 ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: .14em; text-transform: uppercase;
+    color: var(--accent); display: block; margin-bottom: .45rem;
+  }
+  .callout.fault { border-left-color: var(--dead); background: var(--dead-bg); }
+  .callout.fault .label { color: var(--dead); }
+  .callout.measured { border-left-color: var(--live); background: var(--live-bg); }
+  .callout.measured .label { color: var(--live); }
+
+  .thesis {
+    margin: 1.5rem 0;
+    padding: 1rem 1.2rem;
+    border-left: 3px solid var(--accent);
+    font-size: 1.08rem;
+    line-height: 1.55;
+  }
+
+  .ladder-wrap { margin: 1.6rem 0; overflow-x: auto; }
+  table.ladder {
+    border-collapse: collapse;
+    width: 100%;
+    font: 400 .87rem/1.45 ui-sans-serif, system-ui, sans-serif;
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  table.ladder th {
+    text-align: left;
+    font: 600 .69rem/1.3 ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding: .7rem .85rem;
+    border-bottom: 1px solid var(--rule);
+    background: var(--panel-alt);
+    white-space: nowrap;
+  }
+  table.ladder td {
+    padding: .68rem .85rem;
+    border-bottom: 1px solid var(--rule-soft);
+    vertical-align: top;
+    color: var(--ink-soft);
+  }
+  table.ladder tr:last-child td { border-bottom: 0; }
+  table.ladder td.rung { color: var(--ink); font-weight: 600; }
+  table.ladder td.rung .n {
+    display: inline-block;
+    width: 1.35em; height: 1.35em;
+    line-height: 1.35em;
+    text-align: center;
+    border-radius: 3px;
+    margin-right: .5em;
+    font-size: .78em;
+    background: var(--accent-bg);
+    color: var(--accent);
+  }
+  table.ladder .cheap { color: var(--live); font-weight: 600; }
+  table.ladder .dear  { color: var(--dead); font-weight: 600; }
+  .ladder-axis {
+    display: flex; justify-content: space-between;
+    font: 600 .68rem/1 ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: .12em; text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: .55rem .2rem 0;
+  }
+  @media (max-width: 34rem) {
+    table.ladder { font-size: .8rem; }
+    table.ladder th, table.ladder td { padding: .55rem .6rem; }
+  }
+
+  ul.arrival {
+    list-style: none;
+    padding: .4rem 1.15rem;
+    margin: 1.4rem 0;
+    font: 400 .95rem/1.5 ui-sans-serif, system-ui, sans-serif;
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+  }
+  ul.arrival li {
+    padding: .62rem 0 .62rem 1.7rem;
+    border-bottom: 1px solid var(--rule-soft);
+    position: relative;
+    color: var(--ink-soft);
+    margin-bottom: 0;
+  }
+  ul.arrival li:last-child { border-bottom: 0; }
+  ul.arrival li::before {
+    content: "✓";
+    position: absolute; left: .1rem; top: .62rem;
+    color: var(--live); font-weight: 700;
+  }
+  ul.arrival strong { color: var(--ink); }
+
+  footer.end {
+    margin-top: 4rem;
+    padding-top: 1.4rem;
+    border-top: 3px double var(--rule);
+    font: 400 .85rem/1.65 ui-sans-serif, system-ui, sans-serif;
+    color: var(--ink-faint);
+  }
+
+  @media print {
+    body { background: #fff; color: #000; font-size: 11pt; padding: 0; }
+    nav.toc, .callout, .ladder-wrap, ul.arrival { break-inside: avoid; }
+    h2 { break-after: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="mast">
+  <p class="kicker">Working with language models · A design method</p>
+  <h1>An engine is not transport.</h1>
+  <p class="standfirst">
+    A language model is the most capable part of any system it belongs to, and the least
+    repeatable. You do not fix that by asking it to try harder. You build the vehicle around
+    it — so that work <em>arrives</em>, whether or not anyone was watching. This is a method
+    for deciding where each rule in that vehicle should live. It applies to any model.
+  </p>
+</header>
+
+<nav class="toc">
+  <h4>Contents</h4>
+  <ol>
+    <li><a href="#claim">The claim</a></li>
+    <li><a href="#five">The five places a rule can live</a></li>
+    <li><a href="#borrowed">Prefer what already exists</a></li>
+    <li><a href="#lookup">Look it up, don't say it</a></li>
+    <li><a href="#once">Pay for the judgement once</a></li>
+    <li><a href="#gate">An instruction is a request</a></li>
+    <li><a href="#prove">Prove the instructions arrived</a></li>
+    <li><a href="#measure">Count before you build</a></li>
+    <li><a href="#drift">Everything drifts upward</a></li>
+    <li><a href="#arrival">Arrival, and its limit</a></li>
+  </ol>
+</nav>
+
+<h2 id="claim"><span class="num">One</span>The claim</h2>
+
+<p>
+  Ask a language model the same question twice and you get two answers that are usually
+  equivalent and occasionally not. That is not a bug awaiting a fix. It is what the thing is,
+  and everything useful it does depends on it.
+</p>
+
+<p>
+  The instinct is to respond by writing better instructions — to ask the engine to be more
+  careful. But you do not make a car safer by asking the engine to be more careful. You build
+  a frame it cannot bend, a drivetrain that turns its output into motion the same way every
+  time, and gauges that report what actually happened rather than what was meant to happen.
+  The engine stays exactly as powerful and exactly as unpredictable as it was.
+  <strong>The vehicle is what turns it into transport.</strong>
+</p>
+
+<p>
+  This is ordinary engineering. A courier is judged on whether the parcel arrives, not on
+  whether every driver had a good day. Reliable delivery built out of unreliable parts is the
+  normal case. The thing being measured is always the delivery.
+</p>
+
+<h2 id="five"><span class="num">Two</span>The five places a rule can live</h2>
+
+<p>
+  Any rule you want a system to follow can sit in one of five places. They are ordered. The
+  order matters more than any single decision you will make.
+</p>
+
+<div class="ladder-wrap">
+<table class="ladder">
+  <thead>
+    <tr>
+      <th>Where</th>
+      <th>What it means</th>
+      <th>What it costs</th>
+      <th>How it fails</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="rung"><span class="n">1</span>The world</td>
+      <td>Make the action impossible — remove the button, lock the folder, give no access.</td>
+      <td class="cheap">nothing</td>
+      <td>it doesn't</td>
+    </tr>
+    <tr>
+      <td class="rung"><span class="n">2</span>The record</td>
+      <td>Write it down where it can be looked up (a file, a spreadsheet, a calendar).</td>
+      <td class="cheap">nothing</td>
+      <td>obviously</td>
+    </tr>
+    <tr>
+      <td class="rung"><span class="n">3</span>The check</td>
+      <td>A small automatic test answers yes or no the same way every time.</td>
+      <td>seconds, no model</td>
+      <td>loudly, and the same way twice</td>
+    </tr>
+    <tr>
+      <td class="rung"><span class="n">4</span>The instructions</td>
+      <td>Write it into the rules the model sees at the start of every conversation.</td>
+      <td class="dear">paid on every reply, forever</td>
+      <td>quietly</td>
+    </tr>
+    <tr>
+      <td class="rung"><span class="n">5</span>The hope</td>
+      <td>Trust the model to work it out or remember on its own.</td>
+      <td class="dear">unpredictable</td>
+      <td>convincingly</td>
+    </tr>
+  </tbody>
+</table>
+<div class="ladder-axis"><span>cheap · certain</span><span>costly · probable</span></div>
+</div>
+
+<p>
+  Cost climbs as you go down the list. Reliability falls. Those two move together. That fact
+  is the most useful thing to know about building on a model, and the whole method follows from
+  it:
+</p>
+
+<div class="thesis">
+  Put every rule in the lowest place that can hold it. Move it up only when the place below
+  genuinely cannot decide.
+</div>
+
+<p>
+  This is not a safety idea dressed up as an efficiency idea, or the other way round. They are
+  the same idea. A rule moved <em>down</em> gets cheaper and more certain in one move. A rule
+  that drifts <em>up</em> — out of a check and into the instructions, out of a record and into
+  the model's memory — gets more expensive and less certain at the same time, and it does so
+  quietly. That is why the drift keeps happening.
+</p>
+
+<h2 id="borrowed"><span class="num">Three</span>Prefer what already exists</h2>
+
+<p>
+  The top of the list is occupied by tools that were never designed for language models. A file
+  either exists or it doesn't. A spreadsheet either holds the number or it doesn't. A calendar
+  either shows the appointment or it doesn't. A locked folder either opens or refuses. These
+  mechanisms predate the models by decades. They constrain a model the same way they constrain
+  a person, because they do not know or care which one they are dealing with.
+</p>
+
+<p>
+  That indifference is the point. A control invented specifically for AI has to assume something
+  about how the model will behave. Those assumptions are the first thing to break when the
+  models change. A control that knows nothing about models cannot be surprised by one.
+</p>
+
+<div class="callout">
+  <span class="label">The corollary</span>
+  <p>
+    You do not design a new chassis for a new engine. You bolt the new engine into a frame that
+    already survived real roads — because the roads were real.
+  </p>
+</div>
+
+<p>
+  Before inventing anything special, look for the ordinary tool that already does the job. Most
+  of the reliability worth having is inherited rather than authored. Inherited reliability is
+  the only kind that arrives already tested.
+</p>
+
+<h2 id="lookup"><span class="num">Four</span>Look it up, don't say it</h2>
+
+<p>
+  The most expensive place to put a fact is in the instructions the model sees at the start of
+  every conversation. Those instructions are a fixed tax paid on every reply, forever, whether
+  or not the fact is needed. Their cost has nothing to do with how useful the fact is. It scales
+  with how many times you talk.
+</p>
+
+<p>
+  Most of what a conversation needs to know does not have to be written into those instructions,
+  because it is already true of the world. Which project this is. Which version of a document is
+  current. What changed recently. Whether unfinished work is waiting. Those facts can be read at
+  the moment the conversation opens. Read facts cannot go stale, because nothing about them was
+  stored in the model's memory.
+</p>
+
+<p>
+  When you cannot hand the model the fact automatically, the next-best move is still cheaper than
+  hoping: tell it where the record lives and require it to look before answering. The record
+  already exists. What is usually missing is the instruction to consult it.
+</p>
+
+<div class="callout">
+  <span class="label">The practical rule</span>
+  <p>
+    When a model keeps getting the same fact wrong, that is rarely an obedience problem. It is
+    usually a missing line in what you hand it at the start. Correcting a wrong answer costs a
+    whole exchange. Supplying the right one costs a sentence, once.
+  </p>
+</div>
+
+<h2 id="once"><span class="num">Five</span>Pay for the judgement once</h2>
+
+<p>
+  A test is a judgement you pay for one time.
+</p>
+
+<p>
+  Deciding whether the work still meets the standard is a judgement. Made by a model, it is
+  expensive, slow, and comes back slightly different every time, because the reading is
+  different every time. Written down as an automatic check — a formula, a comparison, a simple
+  matching rule — it is one action, it costs almost nothing after the first time, and it gives
+  the same answer today that it gave last week unless something actually changed.
+</p>
+
+<p>
+  Those are the same judgement. The only difference is when you paid for it. A suite of checks
+  is not merely protection against mistakes. It is the conversion of expensive, unrepeatable
+  reasoning into cheap, repeatable fact.
+</p>
+
+<p>
+  The same conversion applies to long procedures. A procedure written out as prose and re-read
+  by the model on every reply can often be replaced by a short pointer to a process that runs
+  outside the model. Behaviour stays the same. The recurring cost falls. The part that left the
+  prose becomes testable, which it never was while it lived only in the conversation.
+</p>
+
+<div class="callout">
+  <span class="label">Two different currencies</span>
+  <p>
+    Words the model reads and words it never sees are not the same expense. A long process the
+    model never reads is free on every reply. A short instruction it re-reads every time is not.
+    Length is only a cost where the model's attention is spent.
+  </p>
+</div>
+
+<h2 id="gate"><span class="num">Six</span>An instruction is a request</h2>
+
+<p>
+  This is the sentence to keep.
+</p>
+
+<div class="thesis">
+  An instruction is a request. A gate is a gate.
+</div>
+
+<p>
+  An instruction lives at the fourth place on the list. It is present, legible, and non-binding.
+  Models ignore instructions. They do so quietly. The failure looks like ordinary work until
+  you notice the rule was never followed.
+</p>
+
+<p>
+  The fix is almost always to move the same rule down one place: an automatic check that simply
+  refuses the action that should not be allowed. The check does not negotiate. It does not need
+  to be remembered. It either permits or it does not.
+</p>
+
+<p>
+  Two practical notes travel with that move:
+</p>
+
+<ul>
+  <li><strong>Name the weakness of each layer.</strong> Checking a path or a fixed property is
+  exact. Screening free-form text for risk is guesswork — a speed bump, not a wall. Writing
+  that difference down keeps the next person from trusting a layer further than it goes.</li>
+  <li><strong>Decide what happens when the gate itself fails.</strong> Some systems fail open
+  (let the action through) so that a refusal is always a deliberate decision. Others fail closed.
+  Either choice can be right. What matters is that the choice is explicit.</li>
+</ul>
+
+<h2 id="prove"><span class="num">Seven</span>Prove the instructions arrived</h2>
+
+<p>
+  If you put rules into the instructions the model sees at the start of every conversation, you
+  must know those instructions are actually being delivered. This is the failure almost nobody
+  checks for.
+</p>
+
+<p>
+  Tools have quiet rules about which starting text they load. Change one setting, rename one
+  file, adjust one option, and the model may stop receiving your rules entirely. It does not
+  complain. It answers in complete sentences, exactly as before, with none of your rules in
+  effect. Working and broken look identical from the outside.
+</p>
+
+<div class="callout measured">
+  <span class="label">A simple proof</span>
+  <p>
+    Put a nonsense string into the starting instructions — something that appears nowhere else.
+    Add one line: when the message you receive is exactly these two words, reply with that
+    string and nothing else. Then send those two words and check the answer.
+  </p>
+  <p>
+    One model call distinguishes <em>loaded</em> from <em>looks fine</em>. It turns the
+    instructions from an assumption into a fact you can verify after any change to the setup.
+  </p>
+</div>
+
+<p>
+  Keep the trigger exact. A looser version (“if asked about the password”) can cause the model
+  to answer a real question with the password and nothing else. A check that displaces real
+  answers has become a bug.
+</p>
+
+<h2 id="measure"><span class="num">Eight</span>Count before you build</h2>
+
+<p>
+  The first check worth writing is the one that decides what else to write.
+</p>
+
+<p>
+  Before adding a rule that inspects the model's output, measure how often it would actually
+  fire against real past work. Something that fires constantly becomes background noise and
+  gets waved through — which means it has stopped being a control. Something that never fires
+  is a comment that still costs time on every reply. There is a narrow band in between where a
+  check is worth having. You find that band by counting, not by arguing.
+</p>
+
+<p>
+  The same applies to cost. A counter or a simple tally of expensive actions often reveals that
+  the problem is not the first few instances but a long tail. The shape of the data decides the
+  design.
+</p>
+
+<p>
+  Both are the method applied to itself. Reasoning about which controls are worth their cost is
+  the fifth place on the list. Counting is the third.
+</p>
+
+<h2 id="drift"><span class="num">Nine</span>Everything drifts upward</h2>
+
+<p>
+  A method with no counterexamples is a sales pitch. The failure that recurs is always the same
+  direction of movement.
+</p>
+
+<div class="callout fault">
+  <span class="label">The one direction things go wrong</span>
+  <p>
+    A fact that belongs in a record gets policed by filtering the model's answers instead of
+    being supplied at the start. A condition a two-line check could decide gets delegated to an
+    instruction the model is asked to remember. A rule written into a contract is never applied
+    to the work that already existed, so the header and the body disagree while both look
+    deliberate.
+  </p>
+  <p>
+    Every case is the same move: something the lower places could have decided drifts upward
+    into something the model has to get right. It never drifts the other way on its own.
+  </p>
+</div>
+
+<p>
+  That is the practical reason to write the method down. The drift is not caused by carelessness.
+  Moving a rule up is almost always the faster edit in the moment, and the extra cost stays
+  invisible until someone looks for it. Naming the direction makes the drift findable.
+</p>
+
+<h2 id="arrival"><span class="num">Ten</span>Arrival, and its limit</h2>
+
+<p>
+  A vehicle is judged by whether it arrives. The destination can be written down in advance.
+  Everything on the list below is checkable at the moment of arrival rather than hoped for
+  afterwards:
+</p>
+
+<ul class="arrival">
+  <li><strong>The work was saved</strong> — all of it, including what happened outside the
+  tools you were watching</li>
+  <li><strong>It is somewhere durable</strong> — reachable later, from another place or another
+  day</li>
+  <li><strong>It went to the right place</strong> — the right project, folder, or document,
+  determined by a record rather than guessed from a name</li>
+  <li><strong>It stayed inside its boundary</strong> — nothing was changed that was not meant
+  to be changed</li>
+  <li><strong>It was checked</strong> — by something that actually ran, with the result attached
+  wherever the verdict travels</li>
+  <li><strong>It can be recovered</strong> — including when the thing that broke is the system
+  around the model itself</li>
+</ul>
+
+<p>
+  That is the whole return. Not that the model became more reliable — it did not, and it will
+  not — but that the work now arrives in a state where each of those properties can be confirmed
+  instead of assumed.
+</p>
+
+<h3>What travels and what does not</h3>
+
+<p>
+  The five places are not tied to any particular model, vendor, or tool. What changes from one
+  setting to another is which places are available. With full control of the environment you may
+  have all five. Inside a locked consumer chat window you may have two and a half. The method
+  still tells you what to do: put each rule as low as the situation allows, and know exactly
+  which ones you were forced to leave high.
+</p>
+
+<h3>Three things this is not</h3>
+
+<p>
+  <strong>It is not a framework.</strong> Configurations are local. What travels is the
+  reasoning about where rules should live.
+</p>
+
+<p>
+  <strong>It is not restriction for its own sake.</strong> Every control exists so that a piece
+  of work lands correctly with nobody watching. A control that cannot be traced to that outcome
+  is ceremony with a running cost.
+</p>
+
+<p>
+  <strong>It is not a substitute for knowing where you are going.</strong> The vehicle can
+  arrive safely at the wrong address. Work that is well-formed, saved, checked, and
+  substantively wrong passes every gate, because a check tests what was specified, not what was
+  wanted. Every reliable system has this residual. Any control that tried to close it would be
+  the model judging the model — the exact failure this method exists to avoid. The vehicle
+  delivers what the driver asked for. Whether the destination was worth the trip is not its job,
+  and deliberately so.
+</p>
+
+<footer class="end">
+  A design method for building on language models. The method is the transferable part.
+</footer>
+
+</div>
+</body>
+</html>
